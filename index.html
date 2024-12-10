@@ -3,100 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gesture Control</title>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <title>Gesture Controlled Interface</title>
     <style>
         body {
-            margin: 0;
             font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f4f6;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
         }
+        h1 {
+            color: #333;
+        }
         #video-container {
-            position: relative;
-            width: 640px;
-            height: 480px;
+            margin-top: 20px;
+            border: 5px solid #4CAF50;
+            border-radius: 10px;
+            overflow: hidden;
         }
         video {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
+            display: block;
+            max-width: 100%;
+            height: auto;
         }
     </style>
 </head>
 <body>
-    <h1>Gesture Control</h1>
+    <h1>Gesture Controlled Interface</h1>
     <div id="video-container">
-        <video id="video" autoplay></video>
-        <canvas id="canvas"></canvas>
+        <img src="{{ url_for('video_feed') }}" alt="Camera Feed">
     </div>
-
-    <script>
-        const videoElement = document.getElementById('video');
-        const canvasElement = document.getElementById('canvas');
-        const canvasCtx = canvasElement.getContext('2d');
-
-        // Load MediaPipe Hands
-        const hands = new Hands({
-            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-        });
-
-        hands.setOptions({
-            maxNumHands: 1,
-            modelComplexity: 1,
-            minDetectionConfidence: 0.7,
-            minTrackingConfidence: 0.7,
-        });
-
-        hands.onResults((results) => {
-            // Clear the canvas
-            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
-
-            // Draw the video frame
-            canvasCtx.drawImage(
-                results.image, 0, 0, canvasElement.width, canvasElement.height
-            );
-
-            // Draw hand landmarks
-            if (results.multiHandLandmarks) {
-                for (const landmarks of results.multiHandLandmarks) {
-                    drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
-                    drawLandmarks(canvasCtx, landmarks, { color: '#FF0000', lineWidth: 2 });
-                }
-            }
-        });
-
-        // Access webcam
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-            videoElement.srcObject = stream;
-            videoElement.play();
-        });
-
-        const camera = new Camera(videoElement, {
-            onFrame: async () => {
-                await hands.send({ image: videoElement });
-            },
-            width: 640,
-            height: 480,
-        });
-        camera.start();
-    </script>
 </body>
 </html>
