@@ -3,44 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gesture Detection</title>
+    <title>Hand Gesture Recognition</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #video-container {
+            width: 100%;
+            height: 100%;
+        }
+        #video {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </head>
 <body>
-    <video id="video" autoplay></video>
-    <p id="output">Gesture: Waiting...</p>
+    <div id="video-container">
+        <img id="video" src="http://127.0.0.1:5000/video_feed" alt="Hand Gesture Recognition">
+    </div>
+
     <script>
         const video = document.getElementById('video');
-        const output = document.getElementById('output');
-
-        // Access webcam
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-            video.srcObject = stream;
-        }).catch((err) => {
-            console.error("Webcam error:", err);
+        video.addEventListener('error', (e) => {
+            console.error('Error with video feed:', e);
+            alert('Failed to load video feed. Please try again.');
         });
-
-        async function processFrame() {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            const imageData = canvas.toDataURL('image/jpeg');
-            try {
-                const response = await fetch('/process_frame', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image: imageData })
-                });
-                const result = await response.json();
-                output.textContent = `Gesture: ${result.gesture}`;
-            } catch (error) {
-                console.error("Error processing frame:", error);
-            }
-        }
-
-        setInterval(processFrame, 200);
     </script>
 </body>
 </html>
