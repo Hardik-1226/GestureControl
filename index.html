@@ -3,51 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gesture Control Interface</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f3f4f6;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        h1 {
-            color: #333;
-        }
-        video {
-            width: 640px;
-            height: 480px;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
-        }
-        #output {
-            margin-top: 20px;
-            font-size: 1.2rem;
-            color: #555;
-        }
-    </style>
+    <title>Gesture Detection</title>
 </head>
 <body>
-    <h1>Gesture Control Interface</h1>
     <video id="video" autoplay></video>
-    <p id="output">Gesture: Waiting for input...</p>
+    <p id="output">Gesture: Waiting...</p>
     <script>
         const video = document.getElementById('video');
         const output = document.getElementById('output');
 
-        // Access user's webcam
+        // Access webcam
         navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
             video.srcObject = stream;
         }).catch((err) => {
-            console.error("Error accessing webcam:", err);
+            console.error("Webcam error:", err);
         });
 
-        // Capture frames and send to server
         async function processFrame() {
             const canvas = document.createElement('canvas');
             canvas.width = video.videoWidth;
@@ -56,19 +27,19 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
             const imageData = canvas.toDataURL('image/jpeg');
-
-            const response = await fetch('/process_frame', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ image: imageData })
-            });
-            const result = await response.json();
-            output.textContent = `Gesture: ${result.gesture}`;
+            try {
+                const response = await fetch('/process_frame', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                });
+                const result = await response.json();
+                output.textContent = `Gesture: ${result.gesture}`;
+            } catch (error) {
+                console.error("Error processing frame:", error);
+            }
         }
 
-        // Continuously process frames
         setInterval(processFrame, 200);
     </script>
 </body>
